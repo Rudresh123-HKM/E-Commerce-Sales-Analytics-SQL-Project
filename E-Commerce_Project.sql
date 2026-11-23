@@ -1,243 +1,34 @@
-create database E_Commerce;
+ ✅ RFM Segmentation
+ ✅ Customer Churn Analysis
+ ✅ Customer Lifetime Value
+ ✅ MoM Revenue Growth (LAG)
+ ✅ Product Profit Margin Analysis
+    
+/*
+Business Problem:
+Ensure customer data integrity by identifying duplicate customer records.
 
-CREATE TABLE IF NOT EXISTS customer_master (
-    customer_id VARCHAR(11) PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
-    customer_age SMALLINT NOT NULL CHECK (customer_age >= 0),
-    gender VARCHAR(20) NOT NULL,
-    customer_segment VARCHAR(30) NOT NULL,
-    customer_city VARCHAR(100) NOT NULL,
-    customer_state VARCHAR(100) NOT NULL,
-    customer_country VARCHAR(100) NOT NULL,
-    region VARCHAR(30) NOT NULL,
-    customer_postal_code VARCHAR(20) NOT NULL,
-    customer_acquisition_cost NUMERIC(10,2) NOT NULL CHECK (customer_acquisition_cost >= 0)
-);
+Why This Analysis Matters:
+Duplicate customer records can lead to inaccurate reporting,
+inflated customer counts, incorrect Customer Lifetime Value (CLV),
+and misleading customer segmentation results.
 
-copy customer_master (customer_id, customer_name, customer_age, gender, customer_segment, customer_city, customer_state, customer_country, region, customer_postal_code, customer_acquisition_cost) 
-FROM 'D:\Data Analyst\Projects\4. E-coomerce\customer_master.csv' 
-CSV HEADER;
+Approach:
+- Group records by customer_id.
+- Count the number of occurrences of each customer_id.
+- Return only those customer IDs appearing more than once.
 
+SQL Concepts Used:
+- GROUP BY
+- COUNT()
+- HAVING
 
-CREATE TABLE dataset_statistics (
-    total_transactions INT,
-    total_columns INT,
-    total_customers INT,
-    total_products_used INT,
-    date_range VARCHAR(50),
-    total_revenue VARCHAR(30),
-    total_profit VARCHAR(30),
-    average_order_value VARCHAR(20),
-    average_rating NUMERIC(3,2),
-    return_rate VARCHAR(10),
-    cancellation_rate VARCHAR(10)
-);
+Expected Outcome:
+Any customer_id returned by this query represents a potential
+duplicate record that should be investigated before performing
+business analysis.
 
-COPY dataset_statistics
-FROM 'D:\Data Analyst\Projects\4. E-coomerce\dataset_statistics.csv'
-DELIMITER ','
-CSV HEADER;
-
-CREATE TABLE ecommerce_sales (
-    order_id                    VARCHAR(20),
-    order_date                  DATE,
-    order_time                  TIME,
-    order_status                VARCHAR(20),
-    sales_channel               VARCHAR(30),
-
-    customer_id                 VARCHAR(20),
-    customer_name               VARCHAR(100),
-    customer_age                INTEGER,
-    gender                      VARCHAR(20),
-    customer_segment            VARCHAR(30),
-    customer_type               VARCHAR(30),
-    customer_city               VARCHAR(100),
-    customer_state              VARCHAR(100),
-    customer_country            VARCHAR(50),
-    region                      VARCHAR(30),
-    customer_postal_code        VARCHAR(20),
-
-    payment_method              VARCHAR(30),
-    payment_status              VARCHAR(20),
-    currency                    VARCHAR(10),
-
-    shipping_method             VARCHAR(30),
-    warehouse                   VARCHAR(20),
-    delivery_days               NUMERIC(6,2),
-    estimated_delivery_days     NUMERIC(6,2),
-    delivery_status             VARCHAR(30),
-
-    return_status               VARCHAR(30),
-    return_reason               VARCHAR(100),
-
-    customer_rating             NUMERIC(3,1),
-    review_sentiment            VARCHAR(30),
-    customer_review             TEXT,
-
-    marketing_channel           VARCHAR(50),
-    campaign_name               VARCHAR(100),
-    coupon_code                 VARCHAR(30),
-
-    loyalty_points_earned       INTEGER,
-    loyalty_points_redeemed     INTEGER,
-    quantity                    INTEGER,
-
-    gross_sales                 NUMERIC(15,2),
-    discount_amount             NUMERIC(15,2),
-    tax_amount                  NUMERIC(15,2),
-    shipping_cost               NUMERIC(15,2),
-    net_sales                   NUMERIC(15,2),
-    product_cost                NUMERIC(15,2),
-    profit                      NUMERIC(15,2),
-    profit_margin_percentage    NUMERIC(10,2),
-    customer_lifetime_value     NUMERIC(15,2),
-
-    is_repeat_customer          BOOLEAN,
-    customer_order_count        INTEGER
-);
-
-COPY ecommerce_sales (
-order_id,
-order_date,
-order_time,
-order_status,
-sales_channel,
-customer_id,
-customer_name,
-customer_age,
-gender,
-customer_segment,
-customer_type,
-customer_city,
-customer_state,
-customer_country,
-region,
-customer_postal_code,
-payment_method,
-payment_status,
-currency,
-shipping_method,
-warehouse,
-delivery_days,
-estimated_delivery_days,
-delivery_status,
-return_status,
-return_reason,
-customer_rating,
-review_sentiment,
-customer_review,
-marketing_channel,
-campaign_name,
-coupon_code,
-loyalty_points_earned,
-loyalty_points_redeemed,
-quantity,
-gross_sales,
-discount_amount,
-tax_amount,
-shipping_cost,
-net_sales,
-product_cost,
-profit,
-profit_margin_percentage,
-customer_lifetime_value,
-is_repeat_customer,
-customer_order_count
-)
-FROM 'D:\Data Analyst\Projects\4. E-coomerce\ecommerce_sales_customer_analytics_150k.csv'
-WITH (
-FORMAT CSV,
-HEADER TRUE,
-DELIMITER ',',
-QUOTE '"',
-ESCAPE '"',
-NULL '',
-ENCODING 'UTF8'
-);
-
-CREATE TABLE order_items (
-    order_item_id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    order_id               VARCHAR(20) NOT NULL,
-    product_id             VARCHAR(20) NOT NULL,
-    quantity               INTEGER NOT NULL,
-    unit_price             NUMERIC(12, 2) NOT NULL,
-    discount_percentage    NUMERIC(12, 10) NOT NULL,
-    discount_amount        NUMERIC(12, 2) NOT NULL,
-    gross_sales            NUMERIC(12, 2) NOT NULL,
-    tax_amount             NUMERIC(12, 2) NOT NULL,
-    shipping_cost          NUMERIC(12, 2) NOT NULL,
-    net_sales              NUMERIC(12, 2) NOT NULL,
-    product_cost           NUMERIC(12, 2) NOT NULL,
-    profit                 NUMERIC(12, 2) NOT NULL
-);
-
-COPY order_items (
-    order_id,
-    product_id,
-    quantity,
-    unit_price,
-    discount_percentage,
-    discount_amount,
-    gross_sales,
-    tax_amount,
-    shipping_cost,
-    net_sales,
-    product_cost,
-    profit
-)
-FROM 'D:\Data Analyst\Projects\4. E-coomerce\order_items.csv'
-WITH (
-    FORMAT CSV,
-    HEADER TRUE,
-    DELIMITER ',',
-    QUOTE '"',
-    ESCAPE '"',
-    ENCODING 'UTF8'
-);
-
-CREATE TABLE product_catalog (
-    product_id           VARCHAR(20) PRIMARY KEY,
-    product_name         VARCHAR(255) NOT NULL,
-    product_category     VARCHAR(100) NOT NULL,
-    product_subcategory  VARCHAR(100) NOT NULL,
-    brand                VARCHAR(100) NOT NULL,
-    supplier             VARCHAR(100) NOT NULL,
-    unit_price           NUMERIC(10,2) NOT NULL,
-    product_cost         NUMERIC(10,2) NOT NULL,
-    product_rating       NUMERIC(2,1) NOT NULL
-);
-
-COPY product_catalog (
-    product_id,
-    product_name,
-    product_category,
-    product_subcategory,
-    brand,
-    supplier,
-    unit_price,
-    product_cost,
-    product_rating
-)
-FROM 'D:\Data Analyst\Projects\4. E-coomerce\Product_catalogg.csv'
-WITH (
-    FORMAT CSV,
-    HEADER TRUE,
-    DELIMITER ',',
-    QUOTE '"',
-    ESCAPE '"',
-    ENCODING 'UTF8'
-);
-
-select*from customer_master;
-select*from dataset_statistics;
-select*from ecommerce_sales;
-select*from order_items;
-select*from product_catalog;
-
-
---Data Quality Checks
-
---Duplicate Customers
+*/
 select customer_id, count(*) from customer_master 
 group by customer_id
 having count(*) >1;
@@ -248,7 +39,20 @@ join product_catalog pc
 on oi.product_id = pc.product_id
 where pc.product_id is null;
 
---(1) top ten customer by revenue
+/*
+Business Problem:
+Identify high-value customers generating the most revenue.
+
+Business Impact:
+Helps marketing teams target premium customers with
+retention and loyalty campaigns.
+
+SQL Concepts:
+GROUP BY
+Aggregate Functions
+ORDER BY
+LIMIT
+*/
 select cm.customer_name, sum(es.net_sales) as revenue
 from customer_master cm
 join ecommerce_sales es
